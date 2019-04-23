@@ -1,9 +1,22 @@
 const express = require('express');
-//require('dotenv').config();
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const routes = require('./routes/api');
+const path = require('path')
+require('dotenv').config();
 
 const app = express();
 
 const port = process.env.port || 5000;
+
+//console.log(process.env.DB);
+mongoose.connect("mongodb+srv://anshul01:<Password>@cluster0-ubzpm.mongodb.net/test?retryWrites=true", { useNewUrlParser: true })
+    .then(() => console.log(`Database connected successfully`))
+    .catch(err => console.log(err))
+
+//since mongoose promise is deprecated, we use node promise
+
+mongoose.Promise = global.Promise;
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -11,8 +24,13 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use((req, res, next) => {
-    res.send("Welcome to Express");
+app.use(bodyParser.json());
+
+app.use('/api', routes);
+
+app.use((err, req, res, next) => {
+    console.log(err);
+    next();
 });
 
 app.listen(port, () => {
